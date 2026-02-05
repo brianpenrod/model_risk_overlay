@@ -1,46 +1,39 @@
-# Model Monitoring Plan (SOP)
-**Model ID:** EMN-QS-2026-V1
-**SOP Owner:** Quant Ops Team
-**Effective Date:** 2026-02-15
+# Model Monitoring Plan
+**Model ID:** BW-NQ-REV-01
+**Review Cycle:** Weekly (Friday Close)
 
----
+## 1. Weekly Performance Checks
+Every Friday at 16:15 EST, the following metrics are calculated for the trailing week:
 
-## 1. Weekly Checks (Cadence: Every Tuesday 09:00 EST)
+### A. Performance Decay
+* **Metric:** Realized Profit Factor (PF).
+* **Threshold:** Must be > 1.20 over a rolling 5-day period.
+* **Action:** If PF < 1.20, initiate "Amber State" (Review trade logs for execution errors).
 
-### 1.1 Feature Neutral Correlation (FNC)
-*   **Metric:** `FNCv4` (Correlation of predictions with target after neutralizing against all features).
-*   **Threshold:** Must remain positive (> 0.0).
-*   **Logic:** A negative FNC indicates that the "unique alpha" of the model (what isn't explained by simple factors) is actually hurting performance.
-*   **Procedure:** Run `check_fnc.py`. If FNC < 0.0 for the current era, flag for review.
+### B. Drift Detection (The "Vibe Check")
+We monitor if the market structure has shifted away from the model's training assumptions.
+* **Metric:** Average True Range (ATR-14) on 1-hour chart.
+* **Threshold:**
+    * *Low Vol Limit:* ATR < 20 points (Market is too dead for reversal targets).
+    * *High Vol Limit:* ATR > 100 points (Market is too violent for 1-minute stops).
+* **Action:** If ATR breaches limits, reduce position size by 50% until normalization.
 
-### 1.2 Correlation with Metamodel
-*   **Metric:** Spearman Correlation with `MetaModel` (Stake-weighted average of all models).
-*   **Threshold:** Target range [0.4, 0.8].
-*   **Logic:**
-    *   < 0.4: Model is too idiosyncratic/risky.
-    *   > 0.8: Model provides no diversification benefit.
-*   **Procedure:** Check dashboard panel `Similarity_Index`.
+## 2. Monthly Deep Dive
+Performed on the last trading day of the month.
+* **Retraining Assessment:** Run the strategy on the most recent month's data. If the *Information Coefficient (IC)* between signal and return is < 0.01, the parameters (EMA lengths) must be re-optimized.
+* **Broker Audit:** Compare "Strategy Theoretical Entry" vs. "Broker Realized Entry." If average slippage > 1.5 ticks/trade, switch order routing or execution algo.
 
----
+## 3. Triggers & Circuit Breakers
 
-## 2. Monthly Checks (Cadence: First Friday of Month)
+| Status | Trigger Condition | Required Action |
+| :--- | :--- | :--- |
+| **GREEN** | PF > 1.5, Drawdown < 2% | Full Risk Allocation (100%) |
+| **AMBER** | PF < 1.2 *OR* 2 Consecutive Losing Days | **Half Risk:** Cut sizing to 50%. Review daily logs. |
+| **RED** | Max Drawdown > 4% *OR* 4 Consecutive Losing Days | **KILL SWITCH:** Disable model. Revert to paper trading. |
 
-### 2.1 Full Retraining Assessment
-*   **Procedure:** Re-train the model with the latest 4 eras of data added.
-*   **Check:** Compare Validation IC of the new model vs. the previous month's model.
-*   **Pass Condition:** New model Validation IC >= 95% of previous model. If lower, investigate for "concept drift" or bad data in recent eras.
-
-### 2.2 Regime Shift Detection
-*   **Method:** Run Hidden Markov Model (HMM) on market volatility and factor return covariance matrix.
-*   **Output:** `Prob_Regime_Change` (0 to 1).
-*   **Action:** If `Prob_Regime_Change` > 0.7, initiate an ad-hoc meeting with the Risk Committee to discuss potential temporary adjustment of Feature Neutralization parameters.
-
----
-
-## 3. Triggers & Escalation Matrix
-
-| Status Level | Trigger Condition | Automated Action | Manual Required Action |
-| :--- | :--- | :--- | :--- |
-| **GREEN** | Rolling 4-week Sharpe > 0.5 AND FNC > 0. | None. | None. |
-| **AMBER** | 2 consecutive weeks of negative IC OR FNC < 0. | Send Alert Email to Owner (BPENROD). | **Review Feature Exposure.** Check if a specific feature group (e.g., Momentum) caused the drag. |
-| **RED** | Rolling 4-week Sharpe < 0.0. | **Halve Stay/Position Size.** | **Disable Model Slot.** Conduct full "post-mortem" analysis before re-enabling. |
+## 4. Rollback Protocol
+If a "Red State" is triggered:
+1.  Close all active positions immediately.
+2.  Disable the specific strategy in the execution platform (Rithmic/NinjaTrader).
+3.  Tag the Model Version as "DEPRECATED" in GitHub.
+4.  Revert to the previous stable version (e.g., v1.0) if available.
