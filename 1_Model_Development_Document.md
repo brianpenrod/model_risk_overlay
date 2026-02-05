@@ -1,10 +1,10 @@
 # Model Development Document (MDD)
 **Model ID:** BW-NQ-REV-01 (Bud Wiser NQ Reversion)
 **Owner:** Brian Penrod (BPENROD)
-**Version:** 1.0
+**Version:** 1.1
 
 ## 1. Executive Summary
-This model algorithmically captures mean reversion opportunities in Nasdaq-100 Futures (NQ/MNQ) based on Auction Market Theory. The primary objective is to identify "Look Above/Below & Fail" events where price probes critical reference levels (ONH, PDH, VAH/VAL) but fails to sustain acceptance, signaling a rotation back to value. The model utilizes 1-minute granularity for trigger validation (9/21 EMA crosses) to minimize drawdown duration.
+This model algorithmically captures mean reversion opportunities in Nasdaq-100 Futures (NQ/MNQ) based on Auction Market Theory. The primary objective is to identify "Look Above/Below and Fail" events where price probes critical reference levels (ONH, PDH, VAH/VAL) but fails to sustain acceptance, signaling a rotation back to value. The model utilizes 1-minute granularity for trigger validation (9/21 EMA crosses) to minimize drawdown duration.
 
 ## 2. Data Lineage
 * **Primary Source:** CME Group Level 2 Data (via Rithmic/Topstep).
@@ -24,8 +24,8 @@ A "Sweep and Fail" event at time $t$ is defined as a Boolean feature $F_{sweep}$
 $$
 F_{sweep, t} = 
 \begin{cases} 
-1 & \text{if } (H_t > L_{ref}) \land (C_t < L_{ref}) \quad \text{[Bearish Look Above & Fail]} \\
-1 & \text{if } (L_t < L_{ref}) \land (C_t > L_{ref}) \quad \text{[Bullish Look Below & Fail]} \\
+1 & \text{if } (H_t > L_{ref}) \land (C_t < L_{ref}) \quad \text{[Bearish Look Above and Fail]} \\
+1 & \text{if } (L_t < L_{ref}) \land (C_t > L_{ref}) \quad \text{[Bullish Look Below and Fail]} \\
 0 & \text{otherwise}
 \end{cases}
 $$
