@@ -1,0 +1,4 @@
+Finding_ID,Severity,Description,Owner,Date_Opened,Due_Date,Status,Closure_Evidence
+F-001,High,Lack of documentation for hyperparameter seed stability in production retraining pipelines.,BPENROD,2026-02-01,2026-02-15,Open,
+F-002,Medium,Out-of-Sample Max Drawdown duration (6 weeks) exceeds soft limit of 4 weeks during stress test conditions.,Risk_Team,2026-02-02,2026-03-01,Open,
+F-003,Low,Minor discrepancy in 'Data Lineage' section regarding source of 'Sentiment' features.,Data_Eng,2026-02-03,2026-02-28,Remediated,Updated MDD v1.1 linking to Vendor X API docs.
