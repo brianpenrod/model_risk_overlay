@@ -1,82 +1,56 @@
-# Quantitative Risk Overlay & Allocation Engine
-### Automated Fiduciary Controls for Multi-Model Portfolios
+# Model Risk Governance Overlay (MRGO)
+### Institutional-Grade Controls for High-Frequency Futures Strategies
 
-[![Risk Grade](https://img.shields.io/badge/Risk_Class-Institutional-blue)]()
-[![Compliance](https://img.shields.io/badge/Compliance-SR_11--7-green)]()
-[![Status](https://img.shields.io/badge/Status-Active_Monitoring-success)]()
-
-> **Author:** **Brian Penrod, DBA**
-> *Retired US Army Special Forces CSM | Doctor of Business Administration (Finance)*
-
----
-
-## 📉 Business Scenario & Objective
-
-In institutional portfolio management, **Alpha Generation** and **Risk Management** must be decoupled to prevent conflict of interest. While the Alpha models (Operation Overwatch) seek to maximize returns, this **Risk Overlay** acts as the "Second Line of Defense."
-
-**The Business Mandate:**
-1.  **Volatility Targeting:** Maintain an annualized portfolio volatility of **15%**, regardless of market conditions.
-2.  **Correlation Guard:** Automatically detect when "Market Neutral" models begin to correlate (Systemic convergence) and reduce exposure dynamically.
-3.  **Drawdown Control:** Enforce a hard "De-grossing" protocol if drawdown limits are breached.
+| **Metric** | **Status** |
+| :--- | :--- |
+| **Model ID** | `BW-NQ-REV-01` |
+| **Asset Class** | Equity Index Futures (CME: NQ/MNQ) |
+| **Risk Tier** | **Tier 2** (Short-Term Tactical / Intraday) |
+| **Validation** | [Passed with Conditions](2_Independent_Validation_Report.md) |
+| **Owner** | Brian Penrod (BPENROD) |
 
 ---
 
-## 🏗 System Architecture
+## 1. Executive Summary
+This repository houses the **Model Risk Management (MRM)** framework for the "Bud Wiser NQ Reversion" algorithm. Unlike typical retail trading systems that focus solely on entry signals, this framework prioritizes **risk controls, regime detection, and execution governance**.
 
-The Risk Overlay sits downstream from the Signal Generation engine. It acts as a **Gatekeeper** before any order is sent to the exchange.
+The system operates on a **"Defensive Alpha"** philosophy:
+> *Alpha is generated not just by selecting the right trade, but by algorithmically rejecting the wrong ones during high-risk regimes.*
 
+## 2. Strategy Logic (The "Core Physics")
+The underlying algorithm exploits mean reversion opportunities using **Auction Market Theory** principles.
 
-
-### Core Modules
-
-1.  **`volatility_estimator.py`**:
-    * Calculates 20-day and 60-day rolling realized volatility for each strategy.
-    * *Logic:* If realized vol spikes, position size is mathematically reduced to maintain the 15% target (Inverse Volatility Sizing).
-
-2.  **`correlation_matrix.py`**:
-    * Monitors the pairwise correlation between `KZ_CORE`, `KZ_BAL`, and `KZ_DEF`.
-    * *Circuit Breaker:* If pairwise correlation > 0.90 (indicating a liquidity crisis where "all correlations go to 1"), the system cuts leverage by 50%.
-
-3.  **`allocation_optimizer.py`**:
-    * Uses **Hierarchical Risk Parity (HRP)** to allocate capital. Unlike Mean-Variance optimization (which chases past returns), HRP allocates based purely on the risk structure of the cluster.
-
----
-
-## 📊 Operational Logic (The "De-Grossing" Algorithm)
-
-The system follows a strict logical flow to determine the final `Capital_Allocation_Vector`:
+* **Thesis:** Price probes outside value (ONH/PDH) that fail to find acceptance result in rapid rotation back to the Point of Control (POC).
+* **Signal Construction:**
+    1.  **Structural Setup:** "Look Above/Below & Fail" (Sweep of Reference Level).
+    2.  **Momentum Confirmation:** 9/21 EMA Crossover (1-minute granularity).
+    3.  **Execution:** Limit order entry within the "Kill Box" (5 bars post-sweep).
 
 ```mermaid
 graph TD
-    A[Raw Model Signals] --> B{Volatility Check}
-    B -->|Vol < 15%| C{Correlation Check}
-    B -->|Vol > 15%| D["Reduce Leverage (Scalar < 1.0)"]
-    D --> C
+    %% 1. Data Ingest & Signal Generation
+    A[Live Market Data (1-min NQ)] --> B{Signal Generation}
+    B -->|Logic: Sweep of ONH/PDH| C[Potential Setup]
     
-    C -->|Corr < 0.8| E[Allocate via Risk Parity]
-    C -->|Corr > 0.8| F["Trigger Circuit Breaker (-50% Size)"]
+    %% 2. The Risk Overlay (Filters)
+    C --> D{Risk Overlay: Filters}
+    D -- "News Event (CPI/NFP +/- 5m)" --> E[BLOCK TRADE]
+    D -- "RSI Extreme (>70 or <30)" --> E
+    D -- "Choppy Regime (<20pt ATR)" --> E
     
-    E & F --> G[Final Execution Orders]
- ```
-
-🛡️ Governance & Compliance
-This repository adheres to Federal Reserve Guidance SR 11-7 (Model Risk Management) by establishing:
-
-Input Validation: Strict type-checking of return streams.
-
-Limit Monitoring: Hard-coded limits in risk_policy.yaml that cannot be overridden by the trading algorithm.
-
-Audit Trail: Every allocation decision is logged with a timestamp and the specific risk metric that triggered it (e.g., "Leverage reduced due to Volatility Spike on 2026-02-07").
-
-🚀 Usage
-# Run the daily risk assessment
-python run_risk_overlay.py --portfolio "kinetic_zero_live" --config "risk_policy.yaml"
-Output Artifacts
-risk_report_YYYY-MM-DD.pdf: Executive summary of current exposures.
-
-target_weights.csv: The approved capital allocation for the next trading session.
-
-🔒 Access & IP
-This module represents proprietary risk management logic. Source code available for review upon request.
----
-
+    %% 3. Confirmation
+    D -- "Filters Passed" --> F{Momentum Confirm}
+    F -- "No 9/21 EMA Cross" --> G[Wait / Decay]
+    
+    %% 4. Execution & Sizing
+    F -- "EMA Cross Confirmed" --> H{Circuit Breaker Status}
+    H -- "Green State" --> I[Execute Full Size]
+    H -- "Amber State (PF < 1.2)" --> J[Execute Half Size]
+    H -- "Red State (DD > 4%)" --> K[KILL SWITCH: NO TRADE]
+    
+    %% 5. Trade Management
+    I & J --> L[Attach Hard Deck Stop]
+    L -->|Stop| M(Swing High/Low + 2 ticks)
+    L -->|Target| N(Fib Extensions 1.272)
+```
+3. Governance ArtifactsThis repository is structured in compliance with Federal Reserve SR 11-7 (Guidance on Model Risk Management).ArtifactPurposeAudienceModel Development Document (MDD)Technical specification, feature definitions, and mathematical logic.Quants / DevelopersIndependent Validation Report (IVR)"Red Team" audit findings, stress tests (VIX > 35), and limitations.Risk OfficersMonitoring PlanWeekly/Monthly drift checks and "Kill Switch" thresholds.OperationsFindings TrackerLive log of identified defects, remediation status, and due dates.Auditors4. Key Risk ControlsVolmageddon Protection: Trading is automatically disabled if the 1-hour ATR exceeds 100 points (indicating VIX spike/liquidity crisis).News Event Lockout: Hard-coded blackout windows 5 minutes before/after High Impact News (CPI, FOMC, NFP).Execution Hard Deck: Stops are placed server-side immediately upon entry (OCO orders) to prevent "runaway algo" losses during disconnects.5. Deployment & VersioningCurrent State: Active MonitoringCodebase: Python (Pandas/NumPy for Backtesting) -> C# (NinjaScript for Execution).Data Source: Rithmic (Tick Data) / Topstep (Execution Venue).Verified by Internal Audit - 2026
