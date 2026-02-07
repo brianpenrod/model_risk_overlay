@@ -1,0 +1,19 @@
+# KINETIC ZERO RISK GOVERNANCE POLICY
+# Compliance Standard: SR 11-7 (Model Risk Management)
+
+global_constraints:
+  max_leverage: 2.0x
+  target_volatility_annualized: 15.0%
+  max_drawdown_limit: -10.0%
+
+circuit_breakers:
+  # If correlation between models exceeds 0.90, reduce size by 50%
+  correlation_spike_threshold: 0.90
+  correlation_penalty_factor: 0.5
+
+  # If recent realized volatility > 25%, halt new entries
+  volatility_regime_cap: 25.0%
+
+allocation_logic:
+  method: "Inverse Volatility Weighting"
+  rebalance_frequency: "Daily"
