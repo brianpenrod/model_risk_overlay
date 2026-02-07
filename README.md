@@ -1,4 +1,3 @@
- (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/README.md b/README.md
 index 0b44e9caf7dc6d09ce4d94a494e85f97840ee2f4..d268ae6ccb938c0cf87745ae18c4018e59458950 100644
 --- a/README.md
@@ -90,6 +89,3 @@ index 0b44e9caf7dc6d09ce4d94a494e85f97840ee2f4..d268ae6ccb938c0cf87745ae18c4018e
 +- **Codebase:** Python (Pandas/NumPy for backtesting) → C# (NinjaScript for execution).
 +- **Data Source:** Rithmic (tick data) / Topstep (execution venue).
 +- **Verified by:** Internal Audit — 2026.
- 
-EOF
-)
