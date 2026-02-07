@@ -56,7 +56,7 @@ graph TD
     C -->|Corr < 0.8| E[Allocate via Risk Parity]
     C -->|Corr > 0.8| F[Trigger Circuit Breaker (-50% Size)]
     
-    E & F --> G[Final Execution Orders]
+    E & F --> G[Final Execution Orders] ```
 
 🛡️ Governance & Compliance
 This repository adheres to Federal Reserve Guidance SR 11-7 (Model Risk Management) by establishing:
@@ -66,7 +66,6 @@ Input Validation: Strict type-checking of return streams.
 Limit Monitoring: Hard-coded limits in risk_policy.yaml that cannot be overridden by the trading algorithm.
 
 Audit Trail: Every allocation decision is logged with a timestamp and the specific risk metric that triggered it (e.g., "Leverage reduced due to Volatility Spike on 2026-02-07").
-```
 
 🚀 Usage
 # Run the daily risk assessment
