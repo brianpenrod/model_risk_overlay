@@ -50,11 +50,11 @@ The system follows a strict logical flow to determine the final `Capital_Allocat
 graph TD
     A[Raw Model Signals] --> B{Volatility Check}
     B -->|Vol < 15%| C{Correlation Check}
-    B -->|Vol > 15%| D[Reduce Leverage (Scalar < 1.0)]
+    B -->|Vol > 15%| D["Reduce Leverage (Scalar < 1.0)"]
     D --> C
     
     C -->|Corr < 0.8| E[Allocate via Risk Parity]
-    C -->|Corr > 0.8| F[Trigger Circuit Breaker (-50% Size)]
+    C -->|Corr > 0.8| F["Trigger Circuit Breaker (-50% Size)"]
     
     E & F --> G[Final Execution Orders] ```
 
