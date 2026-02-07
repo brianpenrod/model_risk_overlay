@@ -56,7 +56,6 @@ graph TD
     L -->|Target| N(Fib Extensions 1.272)
 ```
 
----
 
 ## 3. Governance Artifacts
 This repository is structured in compliance with **Federal Reserve SR 11-7** (Guidance on Model Risk Management).
