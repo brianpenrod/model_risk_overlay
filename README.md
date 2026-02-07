@@ -30,32 +30,27 @@ The underlying algorithm exploits mean reversion opportunities using **Auction M
 
 ```mermaid
 graph TD
-    %% 1. Data Ingest & Signal Generation
-    A[Live Market Data (1-min NQ)] --> B{Signal Generation}
-    B -->|Logic: Sweep of ONH/PDH| C[Potential Setup]
+    A["Live Market Data (1-min NQ)"] --> B{"Signal Generation"}
+    B -->|"Logic: Sweep of ONH/PDH"| C["Potential Setup"]
     
-    %% 2. The Risk Overlay (Filters)
-    C --> D{Risk Overlay: Filters}
-    D -- "News Event (CPI/NFP +/- 5m)" --> E[BLOCK TRADE]
-    D -- "RSI Extreme (>70 or <30)" --> E
-    D -- "Choppy Regime (<20pt ATR)" --> E
+    C --> D{"Risk Overlay: Filters"}
+    D -->|"News Event: CPI/NFP +/- 5m"| E["BLOCK TRADE"]
+    D -->|"RSI Extreme: >70 or &lt;30"| E
+    D -->|"Choppy Regime: &lt;20pt ATR"| E
     
-    %% 3. Confirmation
-    D -- "Filters Passed" --> F{Momentum Confirm}
-    F -- "No 9/21 EMA Cross" --> G[Wait / Decay]
+    D -->|"Filters Passed"| F{"Momentum Confirm"}
+    F -->|"No 9/21 EMA Cross"| G["Wait / Decay"]
     
-    %% 4. Execution & Sizing
-    F -- "EMA Cross Confirmed" --> H{Circuit Breaker Status}
-    H -- "Green State" --> I[Execute Full Size]
-    H -- "Amber State (PF < 1.2)" --> J[Execute Half Size]
-    H -- "Red State (DD > 4%)" --> K[KILL SWITCH: NO TRADE]
+    F -->|"EMA Cross Confirmed"| H{"Circuit Breaker Status"}
+    H -->|"Green State"| I["Execute Full Size"]
+    H -->|"Amber State: PF &lt; 1.2"| J["Execute Half Size"]
+    H -->|"Red State: DD > 4%"| K["KILL SWITCH: NO TRADE"]
     
-    %% 5. Trade Management
-    I & J --> L[Attach Hard Deck Stop]
-    L -->|Stop| M(Swing High/Low + 2 ticks)
-    L -->|Target| N(Fib Extensions 1.272)
+    I --> L["Attach Hard Deck Stop"]
+    J --> L
+    L -->|Stop| M["Swing High/Low + 2 ticks"]
+    L -->|Target| N["Fib Extensions 1.272"]
 ```
-
 
 ## 3. Governance Artifacts
 This repository is structured in compliance with **Federal Reserve SR 11-7** (Guidance on Model Risk Management).
