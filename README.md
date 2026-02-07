@@ -57,6 +57,7 @@ graph TD
     C -->|Corr > 0.8| F[Trigger Circuit Breaker (-50% Size)]
     
     E & F --> G[Final Execution Orders]
+```
 🛡️ Governance & Compliance
 This repository adheres to Federal Reserve Guidance SR 11-7 (Model Risk Management) by establishing:
 
